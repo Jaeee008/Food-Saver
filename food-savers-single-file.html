@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Food Savers</title>
+<style>
+:root{--bg:#f4faf4;--card:#fff;--text:#1d2b1f;--muted:#5d6e60;--green:#2e9e4f;--red:#d64545;--line:#d5e5d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a14;--card:#1c271f;--text:#e8f2e9;--muted:#9bb09e;--line:#2c3d2f}}
+:root[data-theme="dark"]{--bg:#121a14;--card:#1c271f;--text:#e8f2e9;--muted:#9bb09e;--line:#2c3d2f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Arial,sans-serif;display:flex;justify-content:center}
+#app{width:100%;margin:0 auto;padding:clamp(12px,3vw,28px)}#app.narrow{max-width:640px}#app.wide{max-width:820px}
+h1{font-size:clamp(22px,4vw,34px);margin:8px 0;text-align:center}h2{font-size:clamp(18px,2.4vw,22px);margin:0 0 8px}
+*{overflow-wrap:anywhere}
+.cards{display:flex;flex-direction:column;gap:12px}.cards .card{margin-bottom:0}
+.plain{list-style:none;padding-left:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}.grid2 .btn{margin-top:0}
+.head{position:relative}.back{position:absolute;left:0;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text);font-size:30px;line-height:1;padding:4px 8px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+.muted{color:var(--muted);font-size:14px}
+button{font:inherit;cursor:pointer}
+.btn{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--text);text-align:left;font-size:clamp(15px,2vw,18px);transition:transform .15s}
+.btn:active{transform:scale(.97)}.btn[disabled]{opacity:.45;cursor:not-allowed}
+.good{background:var(--green)!important;border-color:var(--green)!important;color:#fff!important;animation:pulse .4s}
+.bad{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important;animation:shake .4s}
+.primary{background:var(--green);color:#fff;border-color:var(--green);text-align:center;font-weight:600}
+.top{display:flex;justify-content:space-between;font-weight:600}.top{align-items:center;gap:8px}.exit{background:none;border:2px solid var(--line);color:var(--text);border-radius:10px;padding:4px 10px;font-size:14px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}.bar>div{height:100%;background:var(--green);transition:width .5s}
+.item{font-size:clamp(60px,12vw,96px);text-align:center;animation:drop .5s ease-out}.q{font-size:clamp(17px,2.6vw,22px);font-weight:600;text-align:center}
+.why{margin-top:12px;padding:12px;border-radius:10px;background:var(--bg);animation:fade .4s}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tabs button{flex:1 1 auto;font-size:clamp(14px,1.8vw,16px);padding:10px 6px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--text)}
+.tabs .on{background:var(--green);color:#fff;border-color:var(--green)}
+li{margin-bottom:10px;line-height:1.4}
+@keyframes drop{from{transform:translateY(-60px);opacity:0}60%{transform:translateY(8px)}to{transform:none;opacity:1}}
+@keyframes pulse{50%{transform:scale(1.05)}}@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}@keyframes fade{from{opacity:0}to{opacity:1}}
+</style></head><body><div id="app"></div>
+<script>
+// Format: [emoji, question, CORRECT answer, wrong 1, wrong 2, explanation]  (choices are shuffled automatically)
+const LEVELS=[
+{name:"House",icon:"🏠",qs:[
+["🍗","You cooked a big pot of adobo on Monday. Best way to keep it for the week?","Cool it in shallow containers within 2 hours, refrigerate, freeze portions you won't eat in 3 days","Leave the covered pot on the stove so it stays fresh","Let the whole pot cool overnight on the counter, then refrigerate","Cooked food in the 'danger zone' (5-60°C) multiplies bacteria. Cool fast, store in portions."],
+["🥛","Milk has a 'use by' date tomorrow and you won't finish it.","Freeze it in a container, leaving room to expand","Pour it out to be safe","Leave it out so it 'ages' into yogurt","Milk freezes well, so pouring it out wastes it. Leaving it on the counter is unsafe. Shake or stir after thawing."],
+["🍅","A 5 kg tomato bulk deal is cheaper per kilo. Household of three.","Buy a smaller amount unless you'll cook or preserve the rest this week","Buy it all, as long as it gives you more savings","Buy it all and store it on the counter","A discount only saves money on the food you actually eat. If half of it spoils, you paid double per kilo for what you used. Bulk is worth it only if you can cook, share, freeze, or preserve it in time, like making tomato sauce."],
+["🧊","You just came back from grocery shopping. How do you stock the fridge?","Move older items to the front and put new ones behind","Put new items in front so they are easy to see","Store by food type only","'First in, first out' means older food gets used first."],
+["🍎","Which storage mistake makes food spoil faster?","Storing apples right next to leafy greens","Keeping greens in a container with a paper towel","Keeping bread in a cool, dry place","Apples release ethylene gas, which makes greens yellow and wilt faster."],
+["🍗","Raw chicken's 'use by' date was 2 days ago.","Throw it away, sealed in a bag, in the trash","Smell it, if fine, cook it","Put it in the compost pile","'Use by' is a safety date. Smell can't detect all bacteria, and cooking it longer doesn't remove toxins some bacteria leave behind. Why not compost it? In a simple home pile, raw or cooked meat attracts rats and flies, breaks down slowly, and can spread bacteria. Boiling first doesn't fix that."],
+["🥔","Firm potatoes with small sprouts, no green skin.","Cut off the sprouts and eyes, then cook","Boil them to remove the toxins","Throw all of them out","Firm, non-green potatoes are fine once sprouts are removed. Throwing them all out wastes good food. Boiling does not remove the toxin (solanine), so potatoes that are green or soft should be discarded."],
+["🍚","You have rice from yesterday, refrigerated within 2 hours.","Make fried rice (sinangag)","Throw it, rice can't be reused","Put it in the compost, it's only leftovers","Rice is only risky when left warm for hours, so rice chilled within 2 hours is fine. Composting is wasteful because the rice is still good food, and cooked rice in a simple pile attracts rats and flies. Leaving it out to dry is unsafe. Reheat until steaming hot, only once."],
+["🍖","You have chicken bones and vegetable ends. Best use?","Simmer them into broth","Put them in compost","Throw in the trash","Broth turns scraps into more food, the highest use. Vegetable ends can be composted, but meat bones usually can't go in a simple home compost because they attract pests and break down slowly."],
+["🍲","You made too much soup. How do you freeze it?","In meal-sized portions, labeled with the date","Pour it all in one big container, then freeze","Hot, straight into the freezer","Small, labeled portions cool and freeze quickly, and you thaw only what you need. One big container is the tempting choice because it's easy, but you must thaw the whole block, it freezes slowly in the middle, and thawed soup shouldn't be refrozen, so you end up wasting what you can't finish. Putting hot soup straight into the freezer also warms the other frozen food."]]},
+{name:"School",icon:"🏫",qs:[
+["🍊","You bought two oranges at the canteen but you're full. Best move?","Save the whole, unpeeled one for later or share it with a classmate","Put one in a biodegradable trash bin","Peel both and leave them in your bag","Whole fruit with its peel keeps well and is safe to save or share. A biodegradable bin is still waste: the orange is good food, and food that ends up in a landfill, even in a 'biodegradable' bin, breaks down without air and releases methane. Peeled or bitten food gets contaminated, and in a warm bag it spoils quickly."],
+["🍱","The canteen serves rice by the scoop and you often can't finish it.","Ask for a smaller serving and buy more if still hungry","Ask for extra so you won't be hungry later","Take the usual and throw the rest","Asking for less is free and stops leftover rice from reaching the bin."],
+["🍛","A canteen has cooked dishes left unsold every day.","Cook in smaller batches and use sales records to cook only what sells","Cook big batches in the morning so it never runs out","Keep leftovers in the pots overnight","Without a fridge, cooked food kept at room temperature for hours is unsafe, so storing leftovers is not the answer. Prevent the surplus instead."],
+["⚖️","How can a class discover what food is thrown away most?","Weigh and record what is thrown away each day","Ask everyone their favorite food","Guess from what looks messy","Measuring waste shows where to act first."],
+["🥭","Younger students often bring home whole fruit uneaten from their baon (packed lunch).","Pack it peeled or sliced in a clean container","Stop packing fruit","Pack more so they have a choice","Fruit that is easy to eat gets eaten. Skipping fruit just trades waste for less nutrition."],
+["⏰","If a school can arrange it, which schedule helps students eat more of their food?","Recess before lunch","Lunch right after a long class","Shorter lunch time","Students who play first are hungrier and aren't rushing back to play, so they finish more."],
+["🎒","Rice and ulam from a baon stayed in a bag from morning to 4pm.","Throw it away","Eat it, it was cooked this morning","Reheat it and bring it again tomorrow","Cooked rice and meat or fish dishes left warm for hours can grow bacteria that reheating doesn't remove. Pack smaller amounts, or foods that keep better."],
+["🌱","Which can go into a simple school compost pile?","Fruit peels and vegetable scraps","Meat bones and oily food","Plastic wrappers","Plant scraps compost easily. Meat bones and oily food attract rats and flies and break down slowly. Plastic never breaks down."],
+["📋","What helps a canteen waste less?","Offer small and regular sizes, and track what sells","Serve the same dish every day","Make every serving bigger","Choice of size and sales records match food to what students buy."],
+["🍚","The canteen throws away a lot of cooked rice.","Cook based on past sales and cook more later if it sells out","Always cook the maximum amount","Cook very little and run out early","Cooking by records prevents over-production, and a second small batch covers surprises."]]},
+{name:"Restaurant",icon:"🍽️",qs:[
+["🐟","A new fish delivery arrives. Where does it go?","Behind older stock, labeled with date","In front, so it's used first","Anywhere with space","FIFO: older stock gets used first."],
+["⚖️","What is the best first step to cut kitchen waste?","Weigh and log waste by category","Buy cheaper ingredients","Add more menu items","You can't reduce what you don't measure."],
+["🍛","The buffet is nearly closing and trays are full.","Use smaller trays refilled more often","Fill large trays at the start","Throw everything at 1 hour","Smaller trays keep food fresh and avoid big leftovers."],
+["🥐","Plain pastries and bread didn't sell and are going stale.","Use them as an ingredient, like crumbs replacing part of the flour in cake or bread pudding","Throw them out at closing","Keep them 3 days and sell as fresh","Stale pastries still work as a base for cake, bread pudding, or crumbs, partly replacing flour and saving ingredient costs. Throwing them out wastes good food, and selling old pastries as fresh is dishonest and risky. (Cream-filled items are different, since they spoil fast.)"],
+["🤝","Which food can safely be donated?","Untouched food that was properly stored","Food returned on customers' plates","Buffet food left out for 3 hours","Only safe, never-served food qualifies. Plate returns have been in contact with customers, and buffet food left out for hours is in the danger zone, so neither can be donated."],
+["🍚","Customers often leave half their rice.","Offer small or regular size, with refills on request","Serve more rice so they feel full","Charge for refills only","Choices and refills cut plate waste without losing satisfaction."],
+["🍲","A large pot of hot stock must be stored.","Divide into shallow pans or use an ice bath, then refrigerate","Leave it in the covered pan on the stove so it reheats easily when needed","Cover the whole pot and put it straight in the walk-in","Large hot pots cool too slowly. Leaving stock in a covered pan on the stove keeps it in the danger zone (5-60°C) for hours, and the lid traps heat, so bacteria multiply. Shallow pans or an ice bath cool it fast, and you can reheat portions later."],
+["📦","You keep over-ordering fresh produce.","Order based on sales forecasts and par levels","Order extra, just in case","Order a bit less than needed","Data-based ordering matches supply to demand."],
+["🐟","You have fish heads and bones every day.","Use them in a daily special like sinigang or stock","Throw them out","Compost them","Using them in a menu item turns waste into profit."],
+["🛵","Delivery orders often come back with unused extras.","Make sauces and utensils opt-in","Add extras to every order","Send smaller food portions only","Giving extras only when asked prevents waste."]]},
+{name:"Community",icon:"🏘️",qs:[
+["🧊","What belongs in a community fridge?","Labeled, fresh, in-date packaged food","Half-eaten leftovers","Expired meat","Fresh, labeled, in-date food protects the people who rely on it. Half-eaten leftovers and expired meat can make people sick, so they do not belong there."],
+["🎉","A fiesta ends with lots of untouched food.","Pack it within 2 hours in clean containers and share","Grab one container or plastic bag, put all the food in it, and share at home","Throw it away","Pack leftovers within 2 hours, each dish in its own clean container, labeled. Putting everything into one container mixes allergens, makes saucy and dry dishes soggy, and if one dish spoils it spoils all of it, so nothing is safe to share."],
+["🌱","How do you make good compost?","Mix kitchen scraps with dry leaves","Only kitchen scraps","Add cooked meat","Wet 'greens' (scraps) and dry 'browns' (leaves) balance the pile. Scraps alone get slimy and smelly, and cooked meat attracts pests."],
+["🥬","Palengke vendors have 'ugly' but good vegetables left.","Sell as discounted bundles or donate","Throw them out","Leave them for the next day unchanged","Cosmetic flaws don't affect taste or nutrition."],
+["🥇","Which use of surplus food ranks highest?","Feeding hungry people","Feeding animals","Composting","Feeding people comes first because the food keeps its full value. Animal feed and compost are good uses, but they come after people."],
+["🌾","Farmers leave unharvested crops after the season.","Organize volunteers to harvest and share them","Ignore them","Burn the field","This is called gleaning and rescues good food."],
+["📊","A barangay wants to start. First step?","Measure what's wasted and where","Buy bigger bins","Fine households","Data shows where to focus."],
+["🥭","A mango season leaves too much fruit.","Dry, pickle, or make jam to share","Let the fruit fall","Sell only the biggest","Preserving extends shelf life."],
+["🏷️","What should a donated meal label include?","Date made, 'use by' date, and ingredients","Only the dish name","Only a 'use by' label for safety","A 'use by' date is important for safety, but alone it isn't enough. People with allergies need the ingredients, and the date made tells how old the food is. A full label helps people avoid spoiled food and allergic reactions."],
+["💡","What best changes household habits?","Show how many pesos they save","Post 'don't waste' signs","Give long lectures","People respond to savings they can see."]]}
+];
+const LESSONS={
+"Core ideas":[
+["Why it matters",["Wasted food also wastes the water, energy, land, and money used to grow, transport, and cook it.","Food in landfills breaks down and releases methane, a greenhouse gas.","Saving food saves pesos, and the savings add up every week."]],
+["The food recovery hierarchy (best to worst)",["1. Prevent: buy, cook, and serve only what will be eaten.","2. Feed people: share or donate safe surplus.","3. Feed animals: only if the food is suitable.","4. Recycle: compost, or turn scraps into energy.","5. Landfill: the last resort."]],
+["Read the labels",["'Use by' is about safety. Don't eat food past it.","'Best before' is about quality. The food is often still safe if stored well and looks and smells normal.","Dates only work if food is stored as the label says."]],
+["Keep food safe",["Keep the fridge at 4°C or colder and the freezer at -18°C.","The danger zone is 5-60°C, where bacteria multiply fast.","Refrigerate cooked food within 2 hours, or within 1 hour on very hot days.","Reheat leftovers until steaming hot, and only once."]],
+["Common myths",["'If it smells okay, it's safe.' Many harmful bacteria have no smell.","'Cooking fixes spoiled food.' Heat can't remove toxins some bacteria leave behind.","'Freezing kills germs.' It only pauses them.","'Ugly food is bad food.' Odd shapes and bruises don't change nutrition."]]],
+"House":[
+["Plan before you shop",["Check the fridge and pantry first, and write a list.","Plan 3 to 4 meals and use ingredients across them.","Be careful with bulk deals. Buy extra only if you'll cook or preserve it."]],
+["Store smart",["Use first in, first out: older food goes to the front.","Keep apples and bananas away from leafy greens, since they speed up spoilage.","Store potatoes and onions in a cool, dark, dry place, but not together.","Freeze bread, milk, and cooked food in labeled portions."]],
+["Turn leftovers into new meals",["Day-old rice: sinangag or lugaw.","Leftover fish or chicken: flake and fry, or add to soup.","Overripe bananas: banana bread, turon, or smoothies.","Wilting vegetables: soup, stir-fry, or omelet."]],
+["Use the whole ingredient",["Simmer bones and vegetable ends into broth.","Compost plant scraps. Keep meat, fish, and oily food out of a simple home compost."]],
+["Leftover rules",["Leftovers keep about 3 to 4 days in the fridge.","Cool in shallow containers, and write the date on the lid.","When in doubt about safety, throw it out."]],
+["Try this challenge",["For one week, write down everything you throw away. Look for the biggest item and fix that first."]]],
+"School":[
+["Know your school's setup",["Most public schools don't have a cafeteria that serves students.","Students either buy food from the canteen or bring their own baon.","Waste can happen in both, so each has its own habits."]],
+["If you buy from the canteen",["Ask for a smaller serving, then buy more if you're still hungry.","Buy what you'll actually finish. Bring home or save whole, unopened items.","Tell the canteen what students like, so they cook what gets eaten."]],
+["If you bring baon",["Pack portions you can finish, and let students help choose.","Use clean, covered containers, and keep food out of direct heat.","In hot weather, rice and meat or fish dishes spoil quickly. Don't eat food left in a warm bag for many hours.","Bring home uneaten food so families can see what's wasted."]],
+["With classmates",["Share whole, unpeeled, or sealed food. Never share bitten or opened food.","Make a class pledge: finish what you take, and don't buy what you won't eat."]],
+["School projects",["Do a waste audit: weigh and record trash from one day.","Start a compost pit or garden for fruit peels and vegetable scraps.","Put up posters showing how many pesos and kilos your class saved."]],
+["Tips for canteen operators and teachers",["Cook in smaller batches and use sales records.","Offer small and regular sizes.","Set recess before lunch if possible."]]],
+"Restaurant":[
+["Plan and buy",["Order by forecast and 'par levels' (the amount you need on hand).","Track sales, so you know what really sells.","Buy from suppliers who deliver often, so you can order less at a time."]],
+["Store",["First in, first out: label and date everything.","Keep walk-ins and fridges at proper temperatures.","Cool hot food fast: shallow pans or an ice bath, then refrigerate."]],
+["Prep",["Use trimmings in stock, sauces, and staff meals.","Use whole fish and whole animals, such as fish heads for sinigang.","Prep to forecast, not to fear of running out."]],
+["Serve",["Offer small and regular portions, and refills on request.","Refill buffet trays in small batches.","Make sauces and utensils opt-in for deliveries."]],
+["Handle surplus",["Discount late-day surplus, such as bread and pastries.","Donate safe, never-served food that was properly stored.","Never donate plate returns or food held in the danger zone."]],
+["Measure",["Weigh waste by category: prep, spoilage, and plate waste.","Review the numbers weekly, then fix the biggest source first."]]],
+"Community":[
+["Rescue food first",["Feed people before animals or compost.","Set up a community fridge with labeled, in-date food.","Organize gleaning: volunteers harvest crops that would otherwise be left."]],
+["Share safely",["Pack fiesta leftovers within 2 hours in clean containers.","Label donated food with the date made and ingredients.","Never share half-eaten, spoiled, or expired food."]],
+["Preserve the harvest",["Dry, pickle, ferment, or make jam from surplus fruit and vegetables.","Sell or bundle 'ugly' produce at a discount."]],
+["Compost together",["Mix greens (kitchen scraps) with browns (dry leaves).","Keep meat, fish, and oily food out of simple piles.","Use the compost in a community garden."]],
+["Organize",["Start by measuring what is wasted and where.","Partner with markets, schools, and barangay groups.","Share success with local numbers: kilos saved and pesos saved."]]]};
+const app=document.getElementById("app");
+let unlocked=1,lv,qs,i,score,locked;
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+function home(){app.className="narrow";app.innerHTML=`<h1>🥬 Food Savers</h1><p class="muted" style="text-align:center">Learn to waste less food at home, school, restaurants, and in the community.</p>
+<div class="card"><button class="btn primary" onclick="levels()">🎮 Play</button><button class="btn primary" onclick="lessons(0)">📖 Lessons</button></div>`}
+function levels(){app.className="narrow";app.innerHTML=`<h1>🔒 Unlock all 4 levels</h1><p class="muted" style="text-align:center">Start at Level 1. Pass a level to unlock the next one.</p><div class="card"><div class="grid2">${LEVELS.map((l,n)=>`<button class="btn" ${n+1>unlocked?"disabled":""} onclick="play(${n})">${n+1>unlocked?"🔒":l.icon} Level ${n+1}: ${l.name}</button>`).join("")}</div><p class="muted">Score 7/10 to unlock the next level.</p><button class="btn" onclick="home()">← Back</button></div>`}
+function play(n){lv=n;qs=shuffle(LEVELS[n].qs);i=0;score=0;show()}
+function show(){app.className="narrow";locked=false;const q=qs[i];q.opts=q.opts||shuffle([q[2],q[3],q[4]]);
+app.innerHTML=`<div class="top"><button class="exit" aria-label="Exit level" onclick="quit()">✕ Exit</button><span>${LEVELS[lv].icon} ${LEVELS[lv].name}</span><span>${i+1}/10</span><span>⭐ ${score}</span></div>
+<div class="bar"><div style="width:${i*10}%"></div></div><div class="card" style="margin-top:12px"><div class="item">${q[0]}</div><p class="q">${q[1]}</p>
+${q.opts.map((t,n)=>`<button class="btn" id="b${n}" onclick="pick(${n})">${t}</button>`).join("")}<div id="fb"></div></div>`}
+function pick(n){if(locked)return;locked=true;const q=qs[i],ok=q.opts[n]===q[2];
+document.getElementById("b"+n).classList.add(ok?"good":"bad");if(!ok)document.getElementById("b"+q.opts.indexOf(q[2])).classList.add("good");else score++;
+document.getElementById("fb").innerHTML=`<div class="why">${ok?"✅ Correct!":"❌ Best choice shown in green."} ${q[5]}</div><button class="btn primary" onclick="next()">${i==9?"See results":"Next"}</button>`}
+function quit(){if(confirm("Exit this level? Your progress will be lost."))levels()}
+function next(){i++;i>9?end():show()}
+function end(){app.className="narrow";const pass=score>=7;if(pass&&lv+1==unlocked&&unlocked<4)unlocked++;
+app.innerHTML=`<div class="card"><div class="item">${pass?"🎉":"💪"}</div><h1>${pass?"Level cleared!":"Keep practicing"}</h1><p style="text-align:center">Score: <b>${score}/10</b><br>Estimated food saved: <b>${(score*0.5).toFixed(1)} kg</b></p>
+<button class="btn primary" onclick="play(${lv})">Play again</button>${pass&&lv<3?`<button class="btn primary" onclick="play(${lv+1})">Next level →</button>`:""}<button class="btn" onclick="levels()">Levels</button></div>`}
+function lessons(t){app.className="wide";const names=Object.keys(LESSONS);
+app.innerHTML=`<div class="head"><button class="back" aria-label="Back" onclick="home()">←</button><h1>📖 Lessons</h1></div><div class="tabs">${names.map((n,k)=>`<button class="${k==t?"on":""}" onclick="lessons(${k})">${n}</button>`).join("")}</div>
+<div class="cards">${LESSONS[names[t]].map(([h,l])=>`<div class="card"><h2>${h}</h2><ul${/^\d\./.test(l[0])?' class="plain"':''}>${l.map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("")}</div>`}
+home();
+</script></body></html>
