@@ -14,7 +14,8 @@ Help people spot habits that cause food waste and choose the best action. Saving
 - Works on phone, tablet, and desktop, in light or dark mode
 
 ## Run
-Unzip and double-click `index.html`. No install needed.
+Option 1: Unzip and double-click `index.html`. No install needed.
+Option 2: Open it via educationalfoodsaver.vercel.app 
 
 ## Files
 - `index.html`: page
